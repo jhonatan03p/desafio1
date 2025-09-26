@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "c:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio_1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug"
+			"value" : "c:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -479,7 +479,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio_1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug/CMakeFiles/pkgRedirects"
+			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -551,7 +551,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio_1/desafio_1"
+			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio1/desafio_1"
 		},
 		{
 			"name" : "CMAKE_INSTALL_BINDIR",
@@ -1051,7 +1051,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio_1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug/.qtc/package-manager/auto-setup.cmake"
+			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug/.qtc/package-manager/auto-setup.cmake"
 		},
 		{
 			"name" : "CMAKE_PROJECT_NAME",
@@ -1563,7 +1563,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio_1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug"
+			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio1/desafio_1/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug"
 		},
 		{
 			"name" : "desafio_1_IS_TOP_LEVEL",
@@ -1587,7 +1587,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio_1/desafio_1"
+			"value" : "C:/Users/jpala/OneDrive/Desktop/Universidad/Informatica 2/desafio1/desafio_1"
 		}
 	],
 	"kind" : "cache",

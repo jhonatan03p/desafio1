@@ -43,33 +43,27 @@ unsigned char rotarDerecha(unsigned char c, int n) {
 }
 
 
-void desencriptar(char* buffer,int tam, int n, unsigned char clave) {
+void desencriptar(char* buffer,int tam, int n, unsigned char clave, char* cont) {
     int i = 0;
     while (i<tam) {
         unsigned char c = buffer[i];
         c = c ^ clave;
         c = rotarDerecha(c, n);
-        buffer[i] = c;
+        cont[i] = c;
         i++;
     }
     buffer[tam] = '\0';
 }
 
-char* quitar00(char* buffer,int tam){
-    //Recordaar liberal cuando se deje de usar!!!
-    int j=0;
-    char* cadena = new char[tam + 1];
-
-    for (int i=0;i<tam;i++){
-
-        if (buffer[i]!='\0'){
-            cadena[j]=buffer[i];
+void quitar00(char* buffer, int tam) {
+    int j = 0;
+    for (int i = 0; i < tam; i++) {
+        if (buffer[i] != '\0') {
+            buffer[j] = buffer[i];
             j++;
         }
     }
-
-    cadena[j]='\0';
-    return cadena;
+    buffer[j] = '\0';  // terminamos la cadena
 }
 
 bool estapista(char* buffer,char pista[]){
