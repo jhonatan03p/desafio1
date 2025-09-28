@@ -3,78 +3,95 @@
 #include "desencriptado.h"
 using namespace std;
 
-void leerarchivo(char* archivo, char* buffer){
-    buffer[0] = '\0';
-
+int leerarchivo(const char* archivo, char* buffer) {
     ifstream arch(archivo, ios::binary);
     if (!arch.is_open()) {
         cerr << "No se pudo abrir el archivo: " << archivo << endl;
-        return;
+        return 0;
     }
 
-    char caracter;
-    int pos = 0;
-
-    while (arch.get(caracter) && pos < 3999) {
-        if (caracter != '\r') {
-            buffer[pos] = caracter;
-            pos++;
-        }
-    }
-    buffer[pos] = '\0';
-
+    arch.read(buffer, 4000);
+    int tam = arch.gcount();
     arch.close();
+    return tam;
 }
 
 int main() {
     int n;
     cout << "Ingrese la cantidad de archivos a desencriptar:" << endl;
     cin >> n;
-    int m=1;
-    char encrp[]="EncriptadoX.txt";
-    char pista[]="PistaX.txt";
 
+    int m = 1;
+    char encrp[] = "EncriptadoX.txt";
+    char pista[] = "PistaX.txt";
 
     char contenido1[4000];
     char contenido2[50];
 
-    while (m<=n){
-         encrp[10]=m+48; // Numero de archivo encriptado a abrir
-         pista[5]=m+48; // Numero de archivo de pista a abrir
+    while (m <= n) {
+        encrp[10] = m + 48;  // archivo encriptado
+        pista[5] = m + 48;   // archivo de pista
 
+        int tam = leerarchivo(encrp, contenido1);
+        int tamPista = leerarchivo(pista, contenido2);
 
-        int tam=0;
-        leerarchivo(encrp, contenido1);
-
-
-        for(int i=0;contenido1[i]!='\0';i++){ // definicion de tamano del archivo
-            tam++;
-        }
-
-
-        leerarchivo(pista, contenido2);
         bool bandera = false;
-        cout<<"WHILEEEEEEE"<<endl;
-       for (int key = 0; key <= 255 && !bandera; ++key) { // ciclo con la validacion de claves K
-            //cout<<key<<endl;
-            for (int var = 0; var < 8; ++var) { // ciclo para rotar los bits
-                char* cont=new char[tam+1];
-                desencriptar(contenido1,tam,var,key,cont);
-                quitar00(cont,tam);
-                char* mensaje=descompresionRLE(cont);
-                delete[] cont;
-                if(estapista(mensaje,contenido2)){
-                    cout<<"RLE"<<endl;
-                    cout<<"Rotacion:"<< var << endl;
-                    cout << "Key: 0x" << hex << key << dec << endl;
+
+        for (int key = 0; key <= 256 && !bandera; ++key) {
+            for (int var = 0; var < 8; ++var) {
+                char* cont = new char[tam + 1];
+                desencriptar(contenido1, tam, var, key, cont);
+
+                // --- Primero probamos RLE ---
+                char* copia = new char[tam + 1];
+                for (int i = 0; i < tam; i++) copia[i] = cont[i];
+                copia[tam] = '\0';
+                quitar00(copia, tam);
+
+                char* mensajeRLE = descompresionRLE(copia);
+                if (estapista(mensajeRLE, contenido2)) {
+                    cout <<"======="<<encrp<<"======="<<endl<<mensajeRLE<<endl<<endl;
+                    cout << "Descompresion: RLE" << endl;
+                    cout << "Rotacion: " << var << endl;
+                    cout << "Key: 0x" << hex << key << dec << endl<<endl;
                     bandera = true;
-                    break;
                 }
-                delete[] mensaje;
+                delete[] mensajeRLE;
+                delete[] copia;
+
+                // --- Si aún no se encontró, probamos LZ78 ---
+                if (!bandera) {
+                    unsigned short* indices = nullptr;
+                    unsigned char* caracteres = nullptr;
+                    int nEntradas = 0;
+
+                    parsearLZ78(cont, tam, indices, caracteres, nEntradas);
+
+                    if (nEntradas > 0) {
+                        char* mensajeLZ = new char[5000]; // buffer de salida
+                        if (descomprimirLZ78(indices, caracteres, nEntradas, mensajeLZ, 5000)) {
+                            if (estapista(mensajeLZ, contenido2)) {
+                                cout <<"======="<<encrp<<"======="<<endl<<mensajeLZ<<endl<<endl;
+                                cout << "Descompresion: LZ78" << endl;
+                                cout << "Rotacion: " << var << endl;
+                                cout << "Key: 0x" << hex << key << dec << endl<<endl;
+                                bandera = true;
+                            }
+                        }
+                        delete[] mensajeLZ;
+                    }
+                    delete[] indices;
+                    delete[] caracteres;
+                }
+
+                delete[] cont;
+                if (bandera) break;
             }
-       }
-       m++;
+            if (key==256){
+                cerr<<encrp<<" no se ha podido desencriptar"<<endl;
+            }
+        }
+        m++;
     }
-    //char* mensaje="3A4B5C1D2R";
     return 0;
 }

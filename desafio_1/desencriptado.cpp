@@ -1,40 +1,35 @@
 #include "desencriptado.h"
 #include <iostream>
-
 using namespace std;
-char* descompresionRLE(char* comprimido){
-    int m ;
-    int n=0;
-    int tamaño=0;
-    int ext=0;
 
-    for (int i=0;comprimido[i]!='\0';i++){
-        if (i%2==0){
+char* descompresionRLE(char* comprimido) {
+    int m;
+    int n = 0;
+    int tamaño = 0;
+    int ext = 0;
+
+    for (int i = 0; comprimido[i] != '\0'; i++) {
+        if (i % 2 == 0) {
             ext += (unsigned char)comprimido[i];
         }
     }
-       // cout<<ext<<endl;
+
     char* mensaje = new char[ext + 1];
 
-    for (int i=0;comprimido[i]!='\0';i++){
-
-        if (i%2!=0){
-            char caracter=comprimido[i];
-            m=0;
-
-            while(m<tamaño){
-                mensaje[n]=caracter;
+    for (int i = 0; comprimido[i] != '\0'; i++) {
+        if (i % 2 != 0) {
+            char caracter = comprimido[i];
+            m = 0;
+            while (m < tamaño) {
+                mensaje[n] = caracter;
                 m++;
                 n++;
-
             }
-        }
-
-        else{
-           tamaño=(unsigned char)comprimido[i];
+        } else {
+            tamaño = (unsigned char)comprimido[i];
         }
     }
-    mensaje[n]='\0';
+    mensaje[n] = '\0';
     return mensaje;
 }
 
@@ -42,17 +37,14 @@ unsigned char rotarDerecha(unsigned char c, int n) {
     return (c >> n) | (c << (8 - n));
 }
 
-
-void desencriptar(char* buffer,int tam, int n, unsigned char clave, char* cont) {
-    int i = 0;
-    while (i<tam) {
+void desencriptar(char* buffer, int tam, int n, unsigned char clave, char* cont) {
+    for (int i = 0; i < tam; i++) {
         unsigned char c = buffer[i];
         c = c ^ clave;
         c = rotarDerecha(c, n);
         cont[i] = c;
-        i++;
     }
-    buffer[tam] = '\0';
+    cont[tam] = '\0';
 }
 
 void quitar00(char* buffer, int tam) {
@@ -63,84 +55,91 @@ void quitar00(char* buffer, int tam) {
             j++;
         }
     }
-    buffer[j] = '\0';  // terminamos la cadena
+    buffer[j] = '\0';
 }
 
-bool estapista(char* buffer,char pista[]){
-    int tam_pis=0;
-    int tam_buffer=0;
-    bool match=true;
+bool estapista(char* buffer, char pista[]) {
+    int tam_pis = 0, tam_buffer = 0;
+    for (int i = 0; pista[i] != '\0'; i++) tam_pis++;
+    for (int i = 0; buffer[i] != '\0'; i++) tam_buffer++;
 
-    for (int i=0;pista[i]!='\0';i++){
-        tam_pis++;
-    }
-    char* comparar=new char[tam_pis+1];
-    for (int i=0;buffer[i]!='\0';i++){
-        tam_buffer++;
-    }
-    for (int inicio=0;inicio<=tam_buffer-tam_pis ;inicio++){
-        int n=0;
-        for (int i=inicio;i<inicio+tam_pis;i++){
-            comparar[n]=buffer[i];
-            n++;
-    }
-        comparar[n]='\0';
-    char* p = pista;
-    char* c = comparar;
-    match = true;
-    while (*p != '\0') {
-        if (*p != *c) {
-            match = false;
-            break;
-        }
-        p++;
-        c++;
-    }
-    if(match){
-        delete[] comparar;
-        return true;
-    }
-    }
-
-    delete[] comparar;
-    return false;
-    }
-void descomprimirLZ78(Entrada* datos, int n, char* salida, int maxLen) {
-    const int MAX_DICT = 4096;        // tamaño máximo del diccionario
-    char diccionario[MAX_DICT][256];  // cada cadena máx 255 chars
-    int longitudes[MAX_DICT];
-    int dictSize = 1; // índice 0 = vacío
-
-    int pos = 0; // posición en salida
-
-    for (int i = 0; i < n; i++) {
-        int idx = datos[i].indice;
-        unsigned char c = datos[i].caracter;
-
-        if (idx >= dictSize) {
-            cerr << "Índice inválido en entrada " << i << endl;
-            continue;
-        }
-
-        int len = longitudes[idx];
-        for (int j = 0; j < len && pos < maxLen - 1; j++) {
-            salida[pos++] = diccionario[idx][j];
-        }
-        if (pos < maxLen - 1) {
-            salida[pos++] = c;
-        }
-
-        if (dictSize < MAX_DICT) {
-            for (int j = 0; j < len; j++) {
-                diccionario[dictSize][j] = diccionario[idx][j];
+    for (int inicio = 0; inicio <= tam_buffer - tam_pis; inicio++) {
+        bool match = true;
+        for (int j = 0; j < tam_pis; j++) {
+            if (buffer[inicio + j] != pista[j]) {
+                match = false;
+                break;
             }
-            diccionario[dictSize][len] = c;
-            longitudes[dictSize] = len + 1;
-            dictSize++;
         }
+        if (match) return true;
     }
-    salida[pos] = '\0';
+    return false;
 }
 
+// --- PARSEAR Y DESCOMPRIMIR LZ78 ---
+void parsearLZ78(const char* comprimido, int tam, unsigned short*& indices, unsigned char*& caracteres, int& n) {
+    if (tam < 3) {
+        indices = nullptr;
+        caracteres = nullptr;
+        n = 0;
+        return;
+    }
+    n = tam / 3;
+    indices = new unsigned short[n];
+    caracteres = new unsigned char[n];
 
+    int k = 0;
+    for (int i = 0; i < n; i++) {
+        unsigned char b1 = (unsigned char)comprimido[k++];
+        unsigned char b2 = (unsigned char)comprimido[k++];
+        unsigned short idx = ((unsigned short)b1 << 8) | b2;
+        unsigned char c = (unsigned char)comprimido[k++];
+        indices[i] = idx;
+        caracteres[i] = c;
+    }
+}
 
+bool descomprimirLZ78(unsigned short* indices, unsigned char* caracteres, int n, char* salida, int maxLen) {
+    if (!indices || !caracteres || n <= 0 || !salida) return false;
+
+    int cap = n + 2;
+    char** dic = new char*[cap];
+    int* largos = new int[cap];
+
+    dic[0] = nullptr;
+    largos[0] = 0;
+    int dictSize = 1;
+    int pos = 0;
+
+    for (int i = 0; i < n; ++i) {
+        int idx = indices[i];
+        unsigned char c = caracteres[i];
+        if (idx < 0 || idx >= dictSize) {
+            for (int t = 1; t < dictSize; t++) delete[] dic[t];
+            delete[] dic;
+            delete[] largos;
+            return false;
+        }
+
+        int len = largos[idx];
+        if (pos + len + 1 >= maxLen) break;
+
+        for (int j = 0; j < len; j++) salida[pos++] = dic[idx][j];
+        salida[pos++] = (char)c;
+
+        int newLen = len + 1;
+        char* nueva = new char[newLen];
+        for (int j = 0; j < len; j++) nueva[j] = dic[idx][j];
+        nueva[len] = (char)c;
+
+        dic[dictSize] = nueva;
+        largos[dictSize] = newLen;
+        dictSize++;
+    }
+
+    salida[pos] = '\0';
+    for (int t = 1; t < dictSize; t++) delete[] dic[t];
+    delete[] dic;
+    delete[] largos;
+    return true;
+}
